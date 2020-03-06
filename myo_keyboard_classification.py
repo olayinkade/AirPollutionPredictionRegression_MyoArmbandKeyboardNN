@@ -1,4 +1,12 @@
 import collections
+import math
+
+from CNN import \
+    backward_orientation, backward_accelerometer, backward_gyro, backward_timestamps, \
+    forward_accelerometer, forward_gyro, forward_orientation, forward_timestamps, \
+    left_accelerometer, left_gyro, left_orientation, left_timestamps, \
+    right_accelerometer, right_gyro, right_orientation, right_timestamps, \
+    enter_accelerometer, enter_gyro, enter_orientation, enter_timestamps
 
 import tensorflow as tf
 import pandas as pd
@@ -22,14 +30,6 @@ from typing import List
 # x_col = np.array_split(x_col, 10)
 #
 # print("***" + str(type(x_col[0])))
-
-
-def read_data_into_dict_lists(file_path: str):
-    data = collections.defaultdict(list)
-    raw_data = pd.read_csv(file_path)
-    for column_name in raw_data:
-        data[column_name] = raw_data[column_name].to_list()
-    return data
 
 
 # extract the periods of time with no change in all three axes z, y and z
@@ -70,17 +70,60 @@ def create_ten_groups(peak, timestamps, accelerometer):
     return groups
 
 
-def extract_data_to_ten_groups(orientation_file_path, accelerometer_file_path):
-    orientation = read_data_into_dict_lists(orientation_file_path)
-    accelerometer = read_data_into_dict_lists(accelerometer_file_path)
+def extract_data_to_ten_groups(orientation: dict, accelerometer: dict):
+    # orientation = read_data_into_dict_lists(orientation_file_path)
+    # accelerometer = read_data_into_dict_lists(accelerometer_file_path)
     orientation_nochange_timestamps = extract_nochange_periods(orientation['timestamp'],
                                                                orientation['x'], orientation['y'], orientation['z'])
     highest = get_highest_value(accelerometer['y'])
     return create_ten_groups(highest, orientation_nochange_timestamps, accelerometer)
 
 
-groups = extract_data_to_ten_groups('Myo Keyboard Data/Backward/orientation-1456704054.csv',
-                                    'Myo Keyboard Data/Backward/accelerometer-1456704054.csv')
+def find_existing_timestamp_group_average_lengths(groups, timestamps):
+    length = 0
+    for i in range(len(groups)):
+        belongs_to_groups = False
+        for j in range(len(timestamps)):
+            if float(groups[i][0]) == float(timestamps[j]):
+                belongs_to_groups = True
+            if float(groups[i][1]) == float(timestamps[j]):
+                belongs_to_groups = False
+            if belongs_to_groups:
+                length += 1
+    return length / len(groups)
+
+
+# data being accelerometer, gyro or orientation
+def pre_process_data() -> ():  # type is the type of data
+    # if type == 'gyro':
+    backward_groups = extract_data_to_ten_groups(backward_orientation, backward_accelerometer)
+    forward_groups = extract_data_to_ten_groups(forward_orientation, forward_accelerometer)
+    left_groups = extract_data_to_ten_groups(left_orientation, left_accelerometer)
+    right_groups = extract_data_to_ten_groups(right_orientation, right_accelerometer)
+    enter_groups = extract_data_to_ten_groups(enter_orientation, enter_accelerometer)
+
+    average_group_length_all_labels = \
+        math.floor((find_existing_timestamp_group_average_lengths(backward_groups, backward_timestamps) +
+                    find_existing_timestamp_group_average_lengths(forward_groups, forward_timestamps) +
+                    find_existing_timestamp_group_average_lengths(left_groups, left_timestamps) +
+                    find_existing_timestamp_group_average_lengths(right_groups, right_timestamps) +
+                    find_existing_timestamp_group_average_lengths(enter_groups, enter_timestamps)) / 5)
+
+    return backward_groups, forward_groups, left_groups, right_groups, enter_groups, average_group_length_all_labels
+
+
+# def
+
+
+# axis being x, y or z
+def process_single_axis_gyro(axis: str):
+    result, gyro_data, labels = [], [], []  # labels being the expected/ground truth output
+    backward_groups, forward_groups, left_groups, right_groups, enter_groups, average_group_length_all_labels \
+        = pre_process_data()
+
+
+
+groups = extract_data_to_ten_groups(backward_orientation, backward_accelerometer)
 print()
 """
 for frame_num in range(0, len(x_col)):
