@@ -45,12 +45,6 @@ def extract_nochange_periods(timestamp, x, y, z):
     return periods
 
 
-# values are values of y axis
-def get_highest_value(values):
-    reverse_sorted = sorted(values)  # reversed because values are strings
-    return reverse_sorted[30]
-
-
 def create_ten_groups(peak, timestamps, accelerometer):
     groups = []
     for i in range(len(timestamps) - 1):
@@ -75,8 +69,7 @@ def extract_data_to_ten_groups(orientation: dict, accelerometer: dict):
     # accelerometer = read_data_into_dict_lists(accelerometer_file_path)
     orientation_nochange_timestamps = extract_nochange_periods(orientation['timestamp'],
                                                                orientation['x'], orientation['y'], orientation['z'])
-    highest = get_highest_value(accelerometer['y'])
-    return create_ten_groups(highest, orientation_nochange_timestamps, accelerometer)
+    return create_ten_groups(sorted(accelerometer['y'])[30], orientation_nochange_timestamps, accelerometer)
 
 
 def find_existing_timestamp_group_average_lengths(groups, timestamps):
@@ -112,7 +105,8 @@ def pre_process_data() -> ():  # type is the type of data
     return backward_groups, forward_groups, left_groups, right_groups, enter_groups, average_group_length_all_labels
 
 
-# def
+# TODO
+# def normalize_groups():
 
 
 # axis being x, y or z
