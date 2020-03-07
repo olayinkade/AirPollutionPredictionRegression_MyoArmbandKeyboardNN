@@ -45,7 +45,7 @@ def extract_nochange_periods(timestamp, x, y, z):
     return periods
 
 
-def create_ten_groups(peak, timestamps, accelerometer):
+def create_ten_groups(peak: float, timestamps: List, accelerometer: dict) -> List:
     groups = []
     for i in range(len(timestamps) - 1):
         starting_position = accelerometer['timestamp'].index(timestamps[i])
@@ -65,56 +65,83 @@ def create_ten_groups(peak, timestamps, accelerometer):
 
 
 def extract_data_to_ten_groups(orientation: dict, accelerometer: dict):
-    # orientation = read_data_into_dict_lists(orientation_file_path)
-    # accelerometer = read_data_into_dict_lists(accelerometer_file_path)
     orientation_nochange_timestamps = extract_nochange_periods(orientation['timestamp'],
                                                                orientation['x'], orientation['y'], orientation['z'])
     return create_ten_groups(sorted(accelerometer['y'])[30], orientation_nochange_timestamps, accelerometer)
 
 
-def find_existing_timestamp_group_average_lengths(groups, timestamps):
+def find_existing_timestamp_group_average_lengths(groups: List, timestamps: List) -> int:
     length = 0
     for i in range(len(groups)):
-        belongs_to_groups = False
         for j in range(len(timestamps)):
-            if float(groups[i][0]) == float(timestamps[j]):
-                belongs_to_groups = True
-            if float(groups[i][1]) == float(timestamps[j]):
-                belongs_to_groups = False
-            if belongs_to_groups:
+            if float(groups[i][0]) <= float(timestamps[j]) < float(groups[i][1]):
                 length += 1
-    return length / len(groups)
+    return int(length / len(groups))
+
+
+def normalize_groups(groups: List, expected_group_len: int, timestamps: List, given_data: List) -> List:
+    normalized_groups = []
+    for i in range(len(groups)):
+        curr_max, curr_max_index = 0.0, 0
+        for j in range(len(timestamps)):
+            if float(groups[i][0]) <= float(timestamps[j]) < float(groups[i][1]):
+                curr_max = max(curr_max, float(given_data[j]))
+                if float(given_data[j]) > curr_max:
+                    curr_max_index = j
+        # make sure the groups have the same size
+        normalized_groups.append((timestamps[curr_max_index - int(expected_group_len / 2)],
+                                  timestamps[curr_max_index + int(expected_group_len / 2)]))
+    return normalized_groups
 
 
 # data being accelerometer, gyro or orientation
-def pre_process_data() -> ():  # type is the type of data
-    # if type == 'gyro':
+# type is either gyro, accelerometer and axis is either x, y or z
+def pre_process_data(info_type: str, axis: str) -> ():
     backward_groups = extract_data_to_ten_groups(backward_orientation, backward_accelerometer)
     forward_groups = extract_data_to_ten_groups(forward_orientation, forward_accelerometer)
     left_groups = extract_data_to_ten_groups(left_orientation, left_accelerometer)
     right_groups = extract_data_to_ten_groups(right_orientation, right_accelerometer)
     enter_groups = extract_data_to_ten_groups(enter_orientation, enter_accelerometer)
 
-    average_group_length_all_labels = \
+    mean_group_length_all_labels = \
         math.floor((find_existing_timestamp_group_average_lengths(backward_groups, backward_timestamps) +
                     find_existing_timestamp_group_average_lengths(forward_groups, forward_timestamps) +
                     find_existing_timestamp_group_average_lengths(left_groups, left_timestamps) +
                     find_existing_timestamp_group_average_lengths(right_groups, right_timestamps) +
                     find_existing_timestamp_group_average_lengths(enter_groups, enter_timestamps)) / 5)
 
-    return backward_groups, forward_groups, left_groups, right_groups, enter_groups, average_group_length_all_labels
+    if info_type == 'gyro':
+        backward_groups = normalize_groups(backward_groups, mean_group_length_all_labels,
+                                           backward_timestamps, backward_gyro[axis])
+        forward_groups = normalize_groups(forward_groups, mean_group_length_all_labels,
+                                          forward_timestamps, forward_gyro[axis])
+        left_groups = normalize_groups(left_groups, mean_group_length_all_labels, left_timestamps, left_gyro[axis])
+        right_groups = normalize_groups(right_groups, mean_group_length_all_labels, right_timestamps, right_gyro[axis])
+        enter_groups = normalize_groups(enter_groups, mean_group_length_all_labels, enter_timestamps, enter_gyro[axis])
+    return backward_groups, forward_groups, left_groups, right_groups, enter_groups, mean_group_length_all_labels
 
 
-# TODO
-# def normalize_groups():
+# get the actual data in the right data set and put them in pre-defined groups
+def get_data_based_on_groups(groups: List[tuple], info_type: str, axis: str, given_data: dict, timestamps: List) -> List:
+    actual_data = []
+    if info_type == 'gyro':
+        for i in range(len(groups)):
+            actual_data.append(given_data[axis][timestamps.index(groups[i][0]): timestamps.index(groups[i][1])])
+    return actual_data
 
 
 # axis being x, y or z
 def process_single_axis_gyro(axis: str):
     result, gyro_data, labels = [], [], []  # labels being the expected/ground truth output
     backward_groups, forward_groups, left_groups, right_groups, enter_groups, average_group_length_all_labels \
-        = pre_process_data()
-
+        = pre_process_data('gyro', 'y')
+    backward_gyro_chosen_data = get_data_based_on_groups(backward_groups, 'gyro', 'y', backward_gyro,
+                                                         backward_timestamps)
+    forward_gyro_chosen_data = get_data_based_on_groups(forward_groups, 'gyro', 'y', forward_gyro, forward_timestamps)
+    left_gyro_chosen_data = get_data_based_on_groups(left_groups, 'gyro', 'y', left_gyro, left_timestamps)
+    right_gyro_chosen_data = get_data_based_on_groups(right_groups, 'gyro', 'y', right_gyro, right_timestamps)
+    enter_gyro_chosen_data = get_data_based_on_groups(enter_groups, 'gyro', 'y', enter_gyro, enter_timestamps)
+    
 
 
 groups = extract_data_to_ten_groups(backward_orientation, backward_accelerometer)
