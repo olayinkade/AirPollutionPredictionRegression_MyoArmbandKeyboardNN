@@ -67,6 +67,7 @@ def create_ten_groups(peak: float, timestamps: List, accelerometer: dict) -> Lis
 def extract_data_to_ten_groups(orientation: dict, accelerometer: dict):
     orientation_nochange_timestamps = extract_nochange_periods(orientation['timestamp'],
                                                                orientation['x'], orientation['y'], orientation['z'])
+    a = sorted(accelerometer['y'])
     return create_ten_groups(sorted(accelerometer['y'])[30], orientation_nochange_timestamps, accelerometer)
 
 
@@ -85,8 +86,9 @@ def normalize_groups(groups: List, expected_group_len: int, timestamps: List, gi
         curr_max, curr_max_index = 0.0, 0
         for j in range(len(timestamps)):
             if float(groups[i][0]) <= float(timestamps[j]) < float(groups[i][1]):
-                curr_max = max(curr_max, float(given_data[j]))
+                # curr_max = max(curr_max, float(given_data[j]))
                 if float(given_data[j]) > curr_max:
+                    curr_max = float(given_data[j])
                     curr_max_index = j
         # make sure the groups have the same size
         normalized_groups.append((timestamps[curr_max_index - int(expected_group_len / 2)],
@@ -126,6 +128,11 @@ def get_data_based_on_groups(groups: List[tuple], info_type: str, axis: str, giv
     actual_data = []
     if info_type == 'gyro':
         for i in range(len(groups)):
+            s = groups[i][0]
+            e = groups[i][1]
+            si = timestamps.index(s)
+            ei = timestamps.index(e)
+            d = given_data[axis][si:ei]
             actual_data.append(given_data[axis][timestamps.index(groups[i][0]): timestamps.index(groups[i][1])])
     return actual_data
 
@@ -177,8 +184,8 @@ def process_single_axis_gyro(axis: str):
     return result, labels
 
 
-groups = extract_data_to_ten_groups(backward_orientation, backward_accelerometer)
-print()
+# groups = extract_data_to_ten_groups(backward_orientation, backward_accelerometer)
+# print()
 """
 for frame_num in range(0, len(x_col)):
     maxes.append(x_col[frame_num].max())

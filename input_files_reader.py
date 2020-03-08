@@ -5,7 +5,7 @@ import collections
 
 def read_data_into_dict_lists(file_path: str):
     data = collections.defaultdict(list)
-    raw_data = pd.read_csv(file_path)
+    raw_data = pd.read_csv(file_path, dtype=str)
     for column_name in raw_data:
         data[column_name] = raw_data[column_name].to_list()
     return data
