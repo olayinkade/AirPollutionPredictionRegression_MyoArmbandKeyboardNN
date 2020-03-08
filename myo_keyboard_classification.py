@@ -110,7 +110,7 @@ def pre_process_data(info_type: str, axis: str) -> ():
                     find_existing_timestamp_group_average_lengths(forward_groups, forward_timestamps) +
                     find_existing_timestamp_group_average_lengths(left_groups, left_timestamps) +
                     find_existing_timestamp_group_average_lengths(right_groups, right_timestamps) +
-                    find_existing_timestamp_group_average_lengths(enter_groups, enter_timestamps)) / 5)
+                    find_existing_timestamp_group_average_lengths(enter_groups, enter_timestamps)) / 4)
 
     if info_type == 'gyro':
         backward_groups = normalize_groups(backward_groups, mean_group_length_all_labels,

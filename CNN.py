@@ -29,10 +29,10 @@ def separate_training_test_data():
 training_x, training_y, test_x, test_y = separate_training_test_data()
 
 # network parameters
-n_hidden_layer_1 = 75
-n_hidden_layer_2 = 75
-n_hidden_layer_3 = 75
-n_hidden_layer_4 = 75
+n_hidden_layer_1 = 256
+n_hidden_layer_2 = 256
+n_hidden_layer_3 = 256
+n_hidden_layer_4 = 256
 num_input = len(training_x[0])
 num_classes = 5
 
@@ -48,11 +48,11 @@ weights = {
     'out': tf.Variable(tf.random_normal([n_hidden_layer_4, num_classes]))
 }
 biases = {
-    'b1': tf.Variable([n_hidden_layer_1]),
-    'b2': tf.Variable([n_hidden_layer_2]),
-    'b3': tf.Variable([n_hidden_layer_3]),
-    'b4': tf.Variable([n_hidden_layer_4]),
-    'out': tf.Variable([num_classes])
+    'b1': tf.Variable(tf.random_normal([n_hidden_layer_1])),
+    'b2': tf.Variable(tf.random_normal([n_hidden_layer_2])),
+    'b3': tf.Variable(tf.random_normal([n_hidden_layer_3])),
+    'b4': tf.Variable(tf.random_normal([n_hidden_layer_4])),
+    'out': tf.Variable(tf.random_normal([num_classes]))
 }
 
 
@@ -78,9 +78,9 @@ def multilayer_perceptron(data):
 def train_network(data):
     model = multilayer_perceptron(data)
     # define loss and optimizer
-    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=model, labels=y))
+    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=model, labels=y))
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE)
-    train_op = optimizer.minimize(loss)
+    train_op = optimizer.minimize(loss_op)
     # initialize variables
     init = tf.global_variables_initializer()
 
@@ -95,7 +95,7 @@ def train_network(data):
             for i in range(total_batch):
                 batch_x = np.array(training_x[i*BATCH_SIZE: (i + 1)*BATCH_SIZE])
                 batch_y = np.array(training_y[i*BATCH_SIZE: (i + 1)*BATCH_SIZE])
-                _, c = session.run([train_op, loss], feed_dict={x: batch_x, y: batch_y})
+                _, c = session.run([train_op, loss_op], feed_dict={x: batch_x, y: batch_y})
                 # compute average cost
                 avg_cost += c / total_batch
 
@@ -104,22 +104,21 @@ def train_network(data):
                 print("Epoch:", '%04d' % (epoch + 1), "cost={:.9f}".format(avg_cost))
 
         # test the model
-        # predictions = tf.nn.softmax(model)  # apply softmax to model
-        # correct_predictions = tf.equal(tf.argmax(predictions, 1), tf.argmax(y, 1))
-        # # calculate accuracy
-        # accuracy = tf.reduce_mean(tf.cast(correct_predictions, 'float'))
-        correct_predictions = tf.equal(tf.argmax(model, 1), tf.argmax(y, 1))
+        predictions = tf.nn.softmax(model)  # apply softmax to model
+        correct_predictions = tf.equal(tf.argmax(predictions, 1), tf.argmax(y, 1))
+        # calculate accuracy
         accuracy = tf.reduce_mean(tf.cast(correct_predictions, 'float'))
-        output_weight = session.run(weights['out'])
-        output_bias = session.run(biases['out'])
+        # correct_predictions = tf.equal(tf.argmax(model, 1), tf.argmax(y, 1))
+        # accuracy = tf.reduce_mean(tf.cast(correct_predictions, 'float'))
+        
 
         for i in range(len(test_x)):
             print('Expecting: {}'.format(test_y[i]))
-            output = model.eval(feed_dict={x: [test_x[i]]})
-            # print(model.eval(feed_dict={x: [test_x[i]]}))
+            # output = model.eval(feed_dict={x: [test_x[i]]})
+            print(model.eval(feed_dict={x: [test_x[i]]}))
 
-            softmax = tf.nn.softmax(output).eval()
-            print((tf.nn.softmax(output).eval()))
+            # softmax = tf.nn.softmax(output).eval()
+            # print((tf.nn.softmax(output).eval()))
 
         print('Accuracy: ', accuracy.eval({x: test_x, y: test_y}) * 100, '%')
 
