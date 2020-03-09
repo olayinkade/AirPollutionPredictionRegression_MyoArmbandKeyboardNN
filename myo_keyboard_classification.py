@@ -165,6 +165,7 @@ def process_single_axis(info_type: str, axis: str):
         = pre_process_data(info_type, axis)
     backward_chosen_data, forward_chosen_data = [], []
     left_chosen_data, right_chosen_data, enter_chosen_data = [], [], []
+    print('Getting {} data of axis {}...'.format(info_type, axis))
 
     if info_type == 'gyro':
         backward_chosen_data = get_data_by_groups(backward_groups, info_type, axis, backward_gyro,
@@ -212,6 +213,7 @@ def process_single_axis(info_type: str, axis: str):
 
 # process all axes of the given info type
 def process_multi_axes(info_type: str):
+    print('Getting data from all three axes x, y and z...')
     result = []
     data_x = process_single_axis(info_type, 'x')[0]
     data_y = process_single_axis(info_type, 'y')[0]
