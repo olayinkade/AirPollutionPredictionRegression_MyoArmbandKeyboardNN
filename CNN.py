@@ -110,15 +110,11 @@ def train_network(data):
         accuracy = tf.reduce_mean(tf.cast(correct_predictions, 'float'))
         # correct_predictions = tf.equal(tf.argmax(model, 1), tf.argmax(y, 1))
         # accuracy = tf.reduce_mean(tf.cast(correct_predictions, 'float'))
-        
 
         for i in range(len(test_x)):
             print('Expecting: {}'.format(test_y[i]))
-            # output = model.eval(feed_dict={x: [test_x[i]]})
-            print(model.eval(feed_dict={x: [test_x[i]]}))
-
-            # softmax = tf.nn.softmax(output).eval()
-            # print((tf.nn.softmax(output).eval()))
+            output = model.eval(feed_dict={x: [test_x[i]]})
+            print('Result predicted by model {}'.format(tf.nn.softmax(output).eval()))
 
         print('Accuracy: ', accuracy.eval({x: test_x, y: test_y}) * 100, '%')
 

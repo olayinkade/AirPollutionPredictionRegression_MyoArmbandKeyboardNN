@@ -120,6 +120,17 @@ def pre_process_data(info_type: str, axis: str) -> ():
         left_groups = normalize_groups(left_groups, mean_group_length_all_labels, left_timestamps, left_gyro[axis])
         right_groups = normalize_groups(right_groups, mean_group_length_all_labels, right_timestamps, right_gyro[axis])
         enter_groups = normalize_groups(enter_groups, mean_group_length_all_labels, enter_timestamps, enter_gyro[axis])
+    # elif info_type == 'accelerometer':
+    #     backward_groups = normalize_groups(backward_groups, mean_group_length_all_labels,
+    #                                        backward_timestamps, backward_accelerometer[axis])
+    #     forward_groups = normalize_groups(forward_groups, mean_group_length_all_labels,
+    #                                       forward_timestamps, forward_accelerometer[axis])
+    #     left_groups = normalize_groups(left_groups, mean_group_length_all_labels, left_timestamps,
+    #                                    left_accelerometer[axis])
+    #     right_groups = normalize_groups(right_groups, mean_group_length_all_labels, right_timestamps,
+    #                                     right_accelerometer[axis])
+    #     enter_groups = normalize_groups(enter_groups, mean_group_length_all_labels, enter_timestamps,
+    #                                     enter_accelerometer[axis])
     return backward_groups, forward_groups, left_groups, right_groups, enter_groups, mean_group_length_all_labels
 
 
@@ -184,6 +195,37 @@ def process_single_axis_gyro(axis: str):
     return result, labels
 
 
+def process_single_axis_accelerometer(axis: str):
+    result, gyro_data, labels = [], [], []  # labels being the expected/ground truth output
+    backward_groups, forward_groups, left_groups, right_groups, enter_groups, mean_group_length_all_labels \
+        = pre_process_data('accelerometer', axis)
+    backward_gyro_chosen_data = get_data_based_on_groups(backward_groups, 'accelerometer', axis, backward_gyro,
+                                                         backward_timestamps)
+    forward_gyro_chosen_data = get_data_based_on_groups(forward_groups, 'accelerometer', axis, forward_gyro, forward_timestamps)
+    left_gyro_chosen_data = get_data_based_on_groups(left_groups, 'accelerometer', axis, left_gyro, left_timestamps)
+    right_gyro_chosen_data = get_data_based_on_groups(right_groups, 'accelerometer', axis, right_gyro, right_timestamps)
+    enter_gyro_chosen_data = get_data_based_on_groups(enter_groups, 'accelerometer', axis, enter_gyro, enter_timestamps)
+
+    for i in range(len(backward_gyro_chosen_data)):
+        gyro_data.append(forward_gyro_chosen_data[i])
+        gyro_data.append(backward_gyro_chosen_data[i])
+        gyro_data.append(left_gyro_chosen_data[i])
+        gyro_data.append(right_gyro_chosen_data[i])
+        gyro_data.append(enter_gyro_chosen_data[i])
+        labels.append([1, 0, 0, 0, 0])
+        labels.append([0, 1, 0, 0, 0])
+        labels.append([0, 0, 1, 0, 0])
+        labels.append([0, 0, 0, 1, 0])
+        labels.append([0, 0, 0, 0, 1])
+
+    gyro_data = standardize_groups_length_based(gyro_data, mean_group_length_all_labels)
+
+    for i in range(len(gyro_data)):
+        # first item of a pair is the data, second item is the correct label
+        pair = [list(map(float, gyro_data[i])), labels[i]]
+        result.append(tuple(pair))
+
+    return result, labels
 # groups = extract_data_to_ten_groups(backward_orientation, backward_accelerometer)
 # print()
 """
