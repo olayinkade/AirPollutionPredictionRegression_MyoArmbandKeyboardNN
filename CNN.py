@@ -4,8 +4,8 @@ import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 import numpy as np
 
-from myo_keyboard_classification import process_single_axis_gyro, process_single_axis_accelerometer
-
+# from myo_keyboard_classification import process_single_axis_gyro, process_single_axis_accelerometer
+from myo_keyboard_classification import process_single_axis, process_multi_axes
 LEARNING_RATE = 0.001
 TRAINING_EPOCHS = 1000
 BATCH_SIZE = 4
@@ -14,8 +14,9 @@ DISPLAY_STEP = 200
 
 # seperate given data to training data and test data
 def separate_training_test_data():
-    # data, labels = process_single_axis_gyro('y')
-    data, labels = process_single_axis_accelerometer('x')
+    # data, labels = process_single_axis('gyro', 'y')
+    # data, labels = process_single_axis('accelerometer', 'x')
+    data = process_multi_axes('gyro')
     data = np.array(data)
 
     test_size = int(0.1 * len(data))
