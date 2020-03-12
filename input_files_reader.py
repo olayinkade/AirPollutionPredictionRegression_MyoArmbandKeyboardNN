@@ -1,4 +1,3 @@
-# from myo_keyboard_classification import read_data_into_dict_lists
 import pandas as pd
 import collections
 import matplotlib.pylab as plt
@@ -13,27 +12,19 @@ def read_data_into_dict_lists(file_path: str):
 
 
 def compress_emg(emg: dict):
-    # print('SDFSF')
     compressed = {'timestamp': [], 'emg1': [], 'emg2': [], 'emg3': [], 'emg4': [],
                   'emg5': [], 'emg6': [], 'emg7': [], 'emg8': []}
-    unique_timestamps = set()
-    # for i in range(len(emg['timestamp'])):
-    #     if emg['timestamp'][i] not in unique_timestamps:
-    #         unique_timestamps.add(emg['timestamp'][i])
-    # for i in range(len(unique_timestamps)):
-    #     for i
-    i = 0
-    # print(len(emg['timestamp']))
-    stop = False
+    stop, i = False, 0
     while i < len(emg['timestamp'])-1:
-        # print(i)
         sum_emg1, sum_emg2, sum_emg3, sum_emg4, sum_emg5, sum_emg6, sum_emg7, sum_emg8 = \
             int(emg['emg1'][i]), int(emg['emg2'][i]), int(emg['emg3'][i]), int(emg['emg4'][i]), \
             int(emg['emg5'][i]), int(emg['emg6'][i]), int(emg['emg7'][i]), int(emg['emg8'][i])
+
         for j in range(i+1, i+5):
             if j >= len(emg['timestamp']):
                 stop = True
                 break
+
             if emg['timestamp'][j] == emg['timestamp'][i]:
                 sum_emg1 += int(emg['emg1'][j])
                 sum_emg2 += int(emg['emg2'][j])
@@ -57,9 +48,10 @@ def compress_emg(emg: dict):
                 break
         if stop:
             break
+
     for key in compressed.keys():
         compressed[key] = compressed[key][::2]
-    # print('@#$#@$@$')
+
     return compressed
 
 
@@ -71,9 +63,6 @@ backward_gyro = read_data_into_dict_lists('Myo Keyboard Data/Backward/gyro-14567
 backward_orientation = read_data_into_dict_lists('Myo Keyboard Data/Backward/orientation-1456704054.csv')
 backward_emg = read_data_into_dict_lists('Myo Keyboard Data/Backward/emg-1456704054.csv')
 backward_emg = compress_emg(backward_emg)
-# print(backward_emg)
-# plt.plot(backward_emg['timestamp'], backward_emg['emg1'])
-# plt.show()
 
 forward_accelerometer = read_data_into_dict_lists('Myo Keyboard Data/Forward/accelerometer-1456703940.csv')
 forward_timestamps = forward_accelerometer['timestamp']

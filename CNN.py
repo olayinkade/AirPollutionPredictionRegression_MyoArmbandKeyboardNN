@@ -1,11 +1,8 @@
-# import tensorflow as tf
-import tensorflow.compat.v1 as tf
-
-tf.disable_v2_behavior()
 import numpy as np
 import copy
-# from myo_keyboard_classification import process_single_axis_gyro, process_single_axis_accelerometer
 from myo_keyboard_classification import process_single_axis, process_multi_axes
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 LEARNING_RATE = 0.001
 TRAINING_EPOCHS = 1000
@@ -13,6 +10,8 @@ BATCH_SIZE = 4
 DISPLAY_STEP = 200
 
 
+# this function gets in the needed input for later processing, also makes sure that user can only pass in the correct
+# input with correct format, so the program will not crash because of bad input.
 def get_user_input():
     print('*** Please enter the information as required! ***')
     num_axes = input('> Number of axes, could be either "single" or "multiple": ')
@@ -21,7 +20,7 @@ def get_user_input():
         num_axes = input('> Number of axes: ')
 
     if num_axes == 'multiple':
-        info_types = input('> Data types, separated by commas if there are multiple types, \\'
+        info_types = input('> Data types, separated by commas if there are multiple types, '
                            'each type could be either "gyro" or "accelerometer" or "emg": ')
         info_types = info_types.split(',')
         info_types_duplicate = copy.deepcopy(info_types)
@@ -40,28 +39,27 @@ def get_user_input():
                     info_types.remove(info_type)
                     print('One or more data types have been removed because they are not supported')
         axis = ''
+
     else:
         axis = ''
         info_types = input('> Data type, could be either "gyro" or "accelerometer" or "emg": ')
         while info_types != 'gyro' and info_types != 'accelerometer' and info_types != 'emg':
             print('Data type has to be either "gyro" or "accelerometer" or "emg"!')
             info_types = input('> Data type: ')
-    # if num_axes == 'single':
-    #     axis = input('Choose an axis, could be either "x", "y" or "z" for gyro and accelerometer,\\'
-    #                  ' "emg1", "emg2",..., "emg8" for emg: ')
+
         if info_types == 'gyro' or info_types == 'accelerometer':
             axis = input('> Choose an axis, could be either "x", "y" or "z": ')
             while axis != 'x' and axis != 'y' and axis != 'z':
                 print('Axis has to be either "x", "y" or "z"!')
                 axis = input('> Choose an axis: ')
+
         elif info_types == 'emg':
             axis = input('> Choose an axis, could be either "emg1", "emg2",..., "emg8": ')
             while axis != 'emg1' and axis != 'emg2' and axis != 'emg3' and axis != 'emg4' and axis != 'emg5' \
                     and axis != 'emg6' and axis != 'emg7' and axis != 'emg8':
                 print('Axis has to be either "emg1", "emg2",..., "emg8"!')
                 axis = input('Choose an axis: ')
-    # else:
-        # axis = ''
+
     return info_types, num_axes, axis
 
 
@@ -87,7 +85,7 @@ def separate_training_test_data(info_types, num_axes: str, axis: str):
 
 data_types, number_axes, chosen_axis = get_user_input()
 training_x, training_y, test_x, test_y = separate_training_test_data(data_types, number_axes, chosen_axis)
-#
+
 # network parameters
 n_hidden_layer_1 = 100
 n_hidden_layer_2 = 100
@@ -168,11 +166,9 @@ def train_network(data):
         correct_predictions = tf.equal(tf.argmax(predictions, 1), tf.argmax(y, 1))
         # calculate accuracy
         accuracy = tf.reduce_mean(tf.cast(correct_predictions, 'float'))
-        # correct_predictions = tf.equal(tf.argmax(model, 1), tf.argmax(y, 1))
-        # accuracy = tf.reduce_mean(tf.cast(correct_predictions, 'float'))
 
         for i in range(len(test_x)):
-            print('*** TEST CASE {} ***'.format(i+1))
+            print('*** TEST CASE {} ***'.format(i + 1))
             print('Expecting: {}'.format(test_y[i]))
             output = model.eval(feed_dict={x: [test_x[i]]})
             print('Result predicted by model {}'.format(tf.nn.softmax(output).eval()))
@@ -181,7 +177,6 @@ def train_network(data):
 
 
 def main(argv=None):
-    # data_type, number_axes, chosen_axis = get_user_input()
     train_network(x)
 
 
