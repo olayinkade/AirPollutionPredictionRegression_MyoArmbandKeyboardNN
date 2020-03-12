@@ -14,14 +14,14 @@ DISPLAY_STEP = 200
 
 
 def get_user_input():
-    print('Please enter the information as required!')
-    num_axes = input('Number of axes, could be either "single" or "multiple": ')
+    print('*** Please enter the information as required! ***')
+    num_axes = input('> Number of axes, could be either "single" or "multiple": ')
     while num_axes != 'single' and num_axes != 'multiple':
-        print('Number of axes has to be either "single" or "multiple"')
-        num_axes = input('Number of axes: ')
+        print('Number of axes has to be either "single" or "multiple"!')
+        num_axes = input('> Number of axes: ')
 
     if num_axes == 'multiple':
-        info_types = input('Data types, separated by commas if there are multiple types, \\'
+        info_types = input('> Data types, separated by commas if there are multiple types, \\'
                            'each type could be either "gyro" or "accelerometer" or "emg": ')
         info_types = info_types.split(',')
         info_types_duplicate = copy.deepcopy(info_types)
@@ -32,8 +32,8 @@ def get_user_input():
                 print('One or more data types have been removed because they are not supported')
 
         while len(info_types) == 0:
-            print('Data type has to be either "gyro", "accelerometer" or "emg"')
-            info_types = input('Data types, separated by commas: ')
+            print('Data type has to be either "gyro", "accelerometer" or "emg"!')
+            info_types = input('> Data types, separated by commas: ')
             info_types = info_types.split(',')
             for info_type in info_types_duplicate:
                 if info_type != 'gyro' and info_type != 'accelerometer' and info_type != 'emg':
@@ -41,17 +41,25 @@ def get_user_input():
                     print('One or more data types have been removed because they are not supported')
         axis = ''
     else:
-        info_types = input('Data type, could be either "gyro" or "accelerometer" or "emg": ')
+        axis = ''
+        info_types = input('> Data type, could be either "gyro" or "accelerometer" or "emg": ')
         while info_types != 'gyro' and info_types != 'accelerometer' and info_types != 'emg':
-            print('Data type has to be either "gyro" or "accelerometer"')
-            info_types = input('Data type: ')
+            print('Data type has to be either "gyro" or "accelerometer" or "emg"!')
+            info_types = input('> Data type: ')
     # if num_axes == 'single':
-        axis = input('Choose an axis, could be either "x", "y" or "z" for gyro and accelerometer,\\'
-                     ' "emg1", "emg2",..., "emg8" for emg: ')
-        while axis != 'x' and axis != 'y' and axis != 'z' and axis != 'emg1':
-            print('Axis has to be either "x", "y" or "z" for gyro and accelerometer,\\'
-                  ' "emg1", "emg2",..., "emg8" for emg')
-            axis = input('Choose an axis: ')
+    #     axis = input('Choose an axis, could be either "x", "y" or "z" for gyro and accelerometer,\\'
+    #                  ' "emg1", "emg2",..., "emg8" for emg: ')
+        if info_types == 'gyro' or info_types == 'accelerometer':
+            axis = input('> Choose an axis, could be either "x", "y" or "z": ')
+            while axis != 'x' and axis != 'y' and axis != 'z':
+                print('Axis has to be either "x", "y" or "z"!')
+                axis = input('> Choose an axis: ')
+        elif info_types == 'emg':
+            axis = input('> Choose an axis, could be either "emg1", "emg2",..., "emg8": ')
+            while axis != 'emg1' and axis != 'emg2' and axis != 'emg3' and axis != 'emg4' and axis != 'emg5' \
+                    and axis != 'emg6' and axis != 'emg7' and axis != 'emg8':
+                print('Axis has to be either "emg1", "emg2",..., "emg8"!')
+                axis = input('Choose an axis: ')
     # else:
         # axis = ''
     return info_types, num_axes, axis
@@ -164,6 +172,7 @@ def train_network(data):
         # accuracy = tf.reduce_mean(tf.cast(correct_predictions, 'float'))
 
         for i in range(len(test_x)):
+            print('*** TEST CASE {} ***'.format(i+1))
             print('Expecting: {}'.format(test_y[i]))
             output = model.eval(feed_dict={x: [test_x[i]]})
             print('Result predicted by model {}'.format(tf.nn.softmax(output).eval()))
