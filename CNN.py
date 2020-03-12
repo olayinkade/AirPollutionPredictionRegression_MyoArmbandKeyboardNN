@@ -3,7 +3,7 @@ import tensorflow.compat.v1 as tf
 
 tf.disable_v2_behavior()
 import numpy as np
-
+import copy
 # from myo_keyboard_classification import process_single_axis_gyro, process_single_axis_accelerometer
 from myo_keyboard_classification import process_single_axis, process_multi_axes
 
@@ -15,33 +15,57 @@ DISPLAY_STEP = 200
 
 def get_user_input():
     print('Please enter the information as required!')
-    info_type = input('Data type, could be either "gyro" or "accelerometer": ')
-    while info_type != 'gyro' and info_type != 'accelerometer':
-        print('Data type has to be either "gyro" or "accelerometer"')
-        info_type = input('Data type: ')
     num_axes = input('Number of axes, could be either "single" or "multiple": ')
     while num_axes != 'single' and num_axes != 'multiple':
         print('Number of axes has to be either "single" or "multiple"')
         num_axes = input('Number of axes: ')
-    if num_axes == 'single':
-        axis = input('Choose an axis, could be either "x", "y" or "z"')
-        while axis != 'x' and axis != 'y' and axis != 'z':
-            print('Axis has to be either "x", "y" or "z"')
-            axis = input('Choose an axis: ')
-    else:
+
+    if num_axes == 'multiple':
+        info_types = input('Data types, separated by commas if there are multiple types, \\'
+                           'each type could be either "gyro" or "accelerometer" or "emg": ')
+        info_types = info_types.split(',')
+        info_types_duplicate = copy.deepcopy(info_types)
+
+        for info_type in info_types_duplicate:
+            if info_type != 'gyro' and info_type != 'accelerometer' and info_type != 'emg':
+                info_types.remove(info_type)
+                print('One or more data types have been removed because they are not supported')
+
+        while len(info_types) == 0:
+            print('Data type has to be either "gyro", "accelerometer" or "emg"')
+            info_types = input('Data types, separated by commas: ')
+            info_types = info_types.split(',')
+            for info_type in info_types_duplicate:
+                if info_type != 'gyro' and info_type != 'accelerometer' and info_type != 'emg':
+                    info_types.remove(info_type)
+                    print('One or more data types have been removed because they are not supported')
         axis = ''
-    return info_type, num_axes, axis
+    else:
+        info_types = input('Data type, could be either "gyro" or "accelerometer" or "emg": ')
+        while info_types != 'gyro' and info_types != 'accelerometer' and info_types != 'emg':
+            print('Data type has to be either "gyro" or "accelerometer"')
+            info_types = input('Data type: ')
+    # if num_axes == 'single':
+        axis = input('Choose an axis, could be either "x", "y" or "z" for gyro and accelerometer,\\'
+                     ' "emg1", "emg2",..., "emg8" for emg: ')
+        while axis != 'x' and axis != 'y' and axis != 'z' and axis != 'emg1':
+            print('Axis has to be either "x", "y" or "z" for gyro and accelerometer,\\'
+                  ' "emg1", "emg2",..., "emg8" for emg')
+            axis = input('Choose an axis: ')
+    # else:
+        # axis = ''
+    return info_types, num_axes, axis
 
 
 # seperate given data to training data and test data
-def separate_training_test_data(info_type: str, num_axes: str, axis: str):
+def separate_training_test_data(info_types, num_axes: str, axis: str):
     if num_axes == 'single':
         print('Processing single axis data...')
         # recommend y axis for gyro, x axis for accelerometer
-        data, labels = process_single_axis(info_type, axis)
+        data, labels = process_single_axis(info_types, axis)
     else:  # multiple axes case
         print('Processing multiple axes data...')
-        data = process_multi_axes(info_type)
+        data = process_multi_axes(info_types)
     data = np.array(data)
 
     test_size = int(0.1 * len(data))
@@ -53,14 +77,14 @@ def separate_training_test_data(info_type: str, num_axes: str, axis: str):
     return training_data, training_labels, test_data, test_labels
 
 
-data_type, number_axes, chosen_axis = get_user_input()
-training_x, training_y, test_x, test_y = separate_training_test_data(data_type, number_axes, chosen_axis)
+data_types, number_axes, chosen_axis = get_user_input()
+training_x, training_y, test_x, test_y = separate_training_test_data(data_types, number_axes, chosen_axis)
 #
 # network parameters
-n_hidden_layer_1 = 256
-n_hidden_layer_2 = 256
-n_hidden_layer_3 = 256
-n_hidden_layer_4 = 256
+n_hidden_layer_1 = 100
+n_hidden_layer_2 = 100
+n_hidden_layer_3 = 100
+n_hidden_layer_4 = 100
 num_input = len(training_x[0])
 num_classes = 5
 

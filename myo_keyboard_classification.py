@@ -2,11 +2,11 @@ import collections
 import math
 
 from input_files_reader import \
-    backward_orientation, backward_accelerometer, backward_gyro, backward_timestamps, \
-    forward_accelerometer, forward_gyro, forward_orientation, forward_timestamps, \
-    left_accelerometer, left_gyro, left_orientation, left_timestamps, \
-    right_accelerometer, right_gyro, right_orientation, right_timestamps, \
-    enter_accelerometer, enter_gyro, enter_orientation, enter_timestamps
+    backward_orientation, backward_accelerometer, backward_gyro, backward_timestamps, backward_emg, \
+    forward_accelerometer, forward_gyro, forward_orientation, forward_timestamps, forward_emg, \
+    left_accelerometer, left_gyro, left_orientation, left_timestamps, left_emg, \
+    right_accelerometer, right_gyro, right_orientation, right_timestamps, right_emg, \
+    enter_accelerometer, enter_gyro, enter_orientation, enter_timestamps, enter_emg
 
 import tensorflow as tf
 import pandas as pd
@@ -130,6 +130,14 @@ def pre_process_data(info_type: str, axis: str) -> ():
                                         right_accelerometer[axis])
         enter_groups = normalize_groups(enter_groups, mean_group_length_all_labels, enter_timestamps,
                                         enter_accelerometer[axis])
+    elif info_type == 'emg':
+        backward_groups = normalize_groups(backward_groups, mean_group_length_all_labels,
+                                           backward_timestamps, backward_emg['emg1'])
+        forward_groups = normalize_groups(forward_groups, mean_group_length_all_labels,
+                                          forward_timestamps, forward_emg['emg1'])
+        left_groups = normalize_groups(left_groups, mean_group_length_all_labels, left_timestamps, left_emg['emg1'])
+        right_groups = normalize_groups(right_groups, mean_group_length_all_labels, right_timestamps, right_emg['emg1'])
+        enter_groups = normalize_groups(enter_groups, mean_group_length_all_labels, enter_timestamps, enter_emg['emg1'])
     return backward_groups, forward_groups, left_groups, right_groups, enter_groups, mean_group_length_all_labels
 
 
@@ -142,6 +150,13 @@ def get_data_by_groups(groups: List[tuple], info_type: str, axis: str, given_dat
     elif info_type == 'accelerometer':
         for i in range(len(groups)):
             actual_data.append(given_data[axis][timestamps.index(groups[i][0]): timestamps.index(groups[i][1])])
+    elif info_type == 'emg':
+        given_data_timestamp = copy.deepcopy(given_data['timestamp'])
+        for i in range(len(groups)):
+            clostest_start_time = min(map(float, given_data_timestamp), key=lambda x: abs(x - float(groups[i][0])))
+            clostest_end_time = min(map(float, given_data_timestamp), key=lambda x: abs(x - float(groups[i][1])))
+            actual_data.append(given_data['emg1'][given_data['timestamp'].index(str(int(clostest_start_time))):
+                                                  given_data['timestamp'].index(str(int(clostest_end_time)))])
     return actual_data
 
 
@@ -182,6 +197,12 @@ def process_single_axis(info_type: str, axis: str):
         left_chosen_data = get_data_by_groups(left_groups, info_type, axis, left_accelerometer, left_timestamps)
         right_chosen_data = get_data_by_groups(right_groups, info_type, axis, right_accelerometer, right_timestamps)
         enter_chosen_data = get_data_by_groups(enter_groups, info_type, axis, enter_accelerometer, enter_timestamps)
+    elif info_type == 'emg':
+        backward_chosen_data = get_data_by_groups(backward_groups, info_type, 'emg1', backward_emg, backward_timestamps)
+        forward_chosen_data = get_data_by_groups(forward_groups, info_type, 'emg1', forward_emg, forward_timestamps)
+        left_chosen_data = get_data_by_groups(left_groups, info_type, 'emg1', left_emg, left_timestamps)
+        right_chosen_data = get_data_by_groups(right_groups, info_type, 'emg1', right_emg, right_timestamps)
+        enter_chosen_data = get_data_by_groups(enter_groups, info_type, 'emg1', enter_emg, enter_timestamps)
 
     for i in range(len(backward_chosen_data)):
         data.append(forward_chosen_data[i])
@@ -189,11 +210,6 @@ def process_single_axis(info_type: str, axis: str):
         data.append(left_chosen_data[i])
         data.append(right_chosen_data[i])
         data.append(enter_chosen_data[i])
-        # data.append([forward_chosen_data[i]])
-        # data.append([backward_chosen_data[i]])
-        # data.append([left_chosen_data[i]])
-        # data.append([right_chosen_data[i]])
-        # data.append([enter_chosen_data[i]])
         labels.append([1, 0, 0, 0, 0])
         labels.append([0, 1, 0, 0, 0])
         labels.append([0, 0, 1, 0, 0])
@@ -212,17 +228,29 @@ def process_single_axis(info_type: str, axis: str):
 
 
 # process all axes of the given info type
-def process_multi_axes(info_type: str):
+def process_multi_axes(info_types: List[str]):
     print('Getting data from all three axes x, y and z...')
     result = []
-    data_x = process_single_axis(info_type, 'x')[0]
-    data_y = process_single_axis(info_type, 'y')[0]
-    data_z, label = process_single_axis(info_type, 'z')
-    combinations = []
-    for i in range(len(data_x)):
-        combinations.append(data_x[i][0] + data_y[i][0] + data_z[i][0])
-    for i in range(len(combinations)):
-        result.append([combinations[i], label[i]])
+
+    for info_type in info_types:
+        if info_type == 'accelerometer' or info_type == 'gyro':
+            data_x = process_single_axis(info_type, 'x')[0]
+            data_y = process_single_axis(info_type, 'y')[0]
+            data_z, labels = process_single_axis(info_type, 'z')
+            combinations = []
+            for i in range(len(data_x)):
+                combinations.append(data_x[i][0] + data_y[i][0] + data_z[i][0])
+            for i in range(len(combinations)):
+                result.append([combinations[i], labels[i]])
+        elif info_type == 'emg':
+            data_1 = process_single_axis(info_type, 'emg1')[0]
+            data_2 = process_single_axis(info_type, 'emg2')[0]
+            data_3, labels = process_single_axis(info_type, 'emg3')
+            combinations = []
+            for i in range(len(data_1)):
+                combinations.append(data_1[i][0] + data_2[i][0] + data_3[i][0])
+            for i in range(len(combinations)):
+                result.append([combinations[i], labels[i]])
     return result
 # groups = extract_data_to_ten_groups(backward_orientation, backward_accelerometer)
 # print()
