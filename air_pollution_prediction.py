@@ -7,7 +7,7 @@ tf.disable_v2_behavior()
 
 # Parameters
 learning_rate = 0.001
-training_epochs = 61
+training_epochs = 400
 display_step = 20
 
 train_data_path = 'training_data.csv'
@@ -169,17 +169,17 @@ def simple_linear_regression():
                       "{:.9f}".format(sess.run(loss, feed_dict={X: X_d, Y: Y_d})),
                       "W=", sess.run(w), "b=", sess.run(b))
 
-                fig = plt.figure(figsize=(10, 10), dpi=100)
-                ax = fig.add_subplot(111)
-                ax.set_ylim(0, 1)
-                ax.plot(X_d, Y_d, 'ro', label='Original data')
-
-                ax.plot(X_d, sess.run(w) * X_d + sess.run(b), label='Fitted line')
-                ax.legend()
-                plt.show()
-                fig.savefig( 'plot_{:05d}.png'.format(count), bbox_inches='tight', dpi=100)
-                count = count + 1
-                plt.close(fig)
+                # fig = plt.figure(figsize=(10, 10), dpi=100)
+                # ax = fig.add_subplot(111)
+                # ax.set_ylim(0, 1)
+                # ax.plot(X_d, Y_d, 'ro', label='Original data')
+                #
+                # ax.plot(X_d, sess.run(w) * X_d + sess.run(b), label='Fitted line')
+                # ax.legend()
+                # plt.show()
+                # fig.savefig( 'plot_{:05d}.png'.format(count), bbox_inches='tight', dpi=100)
+                # count = count + 1
+                # plt.close(fig)
         print("Optimization Finished!")
         training_cost = sess.run(loss, feed_dict={X: X_d, Y: Y_d})
         t_w = sess.run(w)

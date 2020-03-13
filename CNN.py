@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-from myo_keyboard_classification import process_single_axis, process_multi_axes
+from myo_keyboard_data_processor import process_single_axis, process_multi_axes
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 
