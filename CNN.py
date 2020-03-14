@@ -34,6 +34,7 @@ def get_user_input():
             print('Data type has to be either "gyro", "accelerometer" or "emg"!')
             info_types = input('> Data types, separated by commas: ')
             info_types = info_types.split(',')
+            info_types_duplicate = copy.deepcopy(info_types)
             for info_type in info_types_duplicate:
                 if info_type != 'gyro' and info_type != 'accelerometer' and info_type != 'emg':
                     info_types.remove(info_type)
@@ -63,7 +64,7 @@ def get_user_input():
     return info_types, num_axes, axis
 
 
-# seperate given data to training data and test data
+# separate given data to training data and test data
 def separate_training_test_data(info_types, num_axes: str, axis: str):
     if num_axes == 'single':
         print('Processing single axis data...')

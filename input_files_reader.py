@@ -3,6 +3,8 @@ import collections
 import matplotlib.pylab as plt
 
 
+# given a CSV file, convert the data into a dictionary with column names as keys, and values of the keys are lists of
+# data in the columns.
 def read_data_into_dict_lists(file_path: str):
     data = collections.defaultdict(list)
     raw_data = pd.read_csv(file_path, dtype=str)
@@ -11,6 +13,8 @@ def read_data_into_dict_lists(file_path: str):
     return data
 
 
+# given that emg has more data entries than other data, this function removes duplicate timestamps and keeps the means
+# of those instead.
 def compress_emg(emg: dict):
     compressed = {'timestamp': [], 'emg1': [], 'emg2': [], 'emg3': [], 'emg4': [],
                   'emg5': [], 'emg6': [], 'emg7': [], 'emg8': []}
@@ -20,6 +24,7 @@ def compress_emg(emg: dict):
             int(emg['emg1'][i]), int(emg['emg2'][i]), int(emg['emg3'][i]), int(emg['emg4'][i]), \
             int(emg['emg5'][i]), int(emg['emg6'][i]), int(emg['emg7'][i]), int(emg['emg8'][i])
 
+        # there's maximum 4 entries with the same timestamp
         for j in range(i+1, i+5):
             if j >= len(emg['timestamp']):
                 stop = True
@@ -50,6 +55,7 @@ def compress_emg(emg: dict):
             break
 
     for key in compressed.keys():
+        # remove every other data point to keep the size consistent.
         compressed[key] = compressed[key][::2]
 
     return compressed

@@ -1,0 +1,54 @@
+INVESTIGATION - MYO KEYBOARD CLASSIFICATION:
+
+
+*** UNDERSTANDING OUTPUT ***
+X is a list of all inputs, Y is a list of all the labels. Each element in Y is a list of 5 items, where one of them is 1 and the other four are 0's, as follow:
+[1, 0, 0, 0, 0]: the pressed key is forward.
+[0, 1, 0 ,0 ,0]: the pressed key is backward.
+[0, 0, 1, 0, 0]: the pressed key is left.
+[0, 0, 0, 1, 0]: the pressed key is right.
+[0, 0, 0, 0, 1]: the pressed key is enter.
+
+
+*** GETTING INPUT ***
+There will be different input prompts to ask users for specific inputs, including if they want to do single axis processing or multi axes processing, different types of data (i.e. gyro, accelerometer or emg) and the preferred axis if they chose to proceed with single axis.
+
+The input prompts are designed to force users only enter the correct/expected inputs, so the program will not crash because of bad inputs.
+
+
+*** SET DETECTION ***
+In order to make the given raw data set "meaningful" and ready for the network to learn, we separated the each data set into 10 different groups based on no change periods, meaning that we only consider the interesting periods of time and ignore the "break" period between actions.
+
+Note that for emg data, we did some data compressing to reduce the data point as we noted that even though emg has more data entries than others, it does follow the same pattern, and by compressing (we removed duplicate timestamps and kept the means), we made sure that everything of the same label follows the same pattern. This means that we can split the appropriate 10 groups.
+
+
+*** SINGLE AXIS ***
+Given 10 periods of time for each data set, we get the actual data between the starting time and ending time, and process those only.
+
+After trial and error with different types of data, we decided to only with accelerometer and gyro and emg. With each data type, the user has the option to choose the appropriate axis that will be used as input for the neural network.
+
+The list of all items of that axis will be fed in to the neural network.
+
+
+*** MULTIPLE AXES ***
+Given (a) preferred data type(s), it will process all axes of all the data types(s) using the single axis processing method for each axis, and the combine them all together. This increases the amount of input data that will be fed in to the neural network.
+
+
+
+*** FINAL RESULTS ***
+Note: the numbers provided below are the average results of 5 trials each type.
+- For single axis:
+  + Gyro: axis y provides the best result - 84% accurate.
+  + Accelerometer: axis x provides the best result - 78% accurate.
+  + Emg: we didn't run all 8 axes individually, but emg1 alone provides an accuracy of only about 55%.
+
+- For multiple axes:
+  + Gyro: all 3 axes combined has the accuracy of 88%.
+  + Accelerometer: all 3 axes combined has the accuracy of 84%.
+  + Gyro and Accelerometer: all 6 axes combined has the accuracy of 88%.
+  + Emg: all 8 axes combined has the accuracy of 53%.
+  + Gyro and Emg: all 11 axes combined has the accuracy of 60%.
+  + Accelerometer and Emg: all 11 axes combined has the accuracy of 63%.
+  + Gyro, accelerometer and Emg: all 14 axes combined has the accuracy of 75%.
+
+It's interesting to notice that emg actually gives quite poor results, and it can actually worsens results of gyro and accelerometer when combined together. On the other hand, gyro and accelerometer perform pretty well, even with just single axis, with results consistently being 80% and above.
