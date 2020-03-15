@@ -3,7 +3,8 @@
 ## TO RUN AIR POLLUTION PREDICTION:
 python air_pollution_prediction.py
 Three functions to help with regression.
-Polynomial regression, linear regression for categorial data, linear regression for normal data
+Polynomial regression, linear regression for categorial data, linear regression for normal data.
+YOu would have to change what portion of the data you want to train with. I left comments
 
 ## TO RUN MYO ARMBAND KEYBOARD CLASSIFICATION:
 python CNN.py
