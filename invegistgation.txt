@@ -1,1 +1,99 @@
 Simple Regression
+This solution uses Linear regression to predict the air pollution in Wanshouxigong between 2013 - 2017
+I use simple linear regression for both continuous and categorical data. Also i consider using polynomial regression.
+Using Polynomial regression, it was hard to compare it to what was already present,
+because of the randomness. But it generated values like simple regression,
+
+TEMP
+Optimization Finished!
+Training cost= 0.014895336 W= 0.5957381 b= -0.16690576
+Testing... (L2 loss Comparison)
+Testing cost= 0.021184638
+Absolute l2 loss difference: 0.0062893024
+
+PRES
+Optimization Finished!
+Training cost= 0.09758679 W= -0.62913495 b= 0.78544044
+Testing... (L2 loss Comparison)
+Testing cost= 0.048127748
+Absolute l2 loss difference: 0.04945904
+
+DEWP
+Optimization Finished!
+Training cost= 0.041909065 W= 0.6201951 b= -0.046938725
+Testing... (L2 loss Comparison)
+Testing cost= 0.02423991
+Absolute l2 loss difference: 0.017669154
+
+
+RAIN
+Training cost= 0.052808862 W= 0.20313486 b= -0.23280005
+Testing... (L2 loss Comparison)
+Testing cost= 0.07693444
+Absolute l2 loss difference: 0.02412558
+
+
+WSPM
+Optimization Finished!
+Training cost= 0.0034771692 W= -0.075433664 b= 0.105130136
+Testing... (L2 loss Comparison)
+Testing cost= 0.012365632
+Absolute l2 loss difference: 0.008888463
+
+TEMP, PRES, DEWP
+Training cost= 0.049945876 W= [0.7740223] b= 0.42884666
+Testing... (L2 loss Comparison)
+Testing cost= 0.074450135
+Absolute l2 loss difference: 0.02450426
+
+DEWP, RAIN, WSPM
+Training cost= 0.014140914 W= [0.0825857] b= -0.2572795
+
+Testing... (L2 loss Comparison)
+Testing cost= 0.047990575
+Absolute l2 loss difference: 0.03384966
+
+TEMP, RAIN, WSPM
+Optimization Finished!
+Training cost= 0.19221896 W= [-1.1841553] b= 1.0233445
+
+Testing... (L2 loss Comparison)
+Testing cost= 0.14616174
+Absolute l2 loss difference: 0.046057224
+TEMP, RAIN, PRES
+Training cost= 0.19884133 W= [-1.0213916] b= 1.1092973
+
+Testing... (L2 loss Comparison)
+Testing cost= 0.19466543
+Absolute l2 loss difference: 0.0041759014
+
+DEWP, WSPM ,PRES
+Optimization Finished!
+Training cost= 0.03463632 W= [0.08378895] b= -0.3641644
+
+Testing... (L2 loss Comparison)
+Testing cost= 0.049467906
+Absolute l2 loss difference: 0.014831588
+
+RAIN, WSPM, PRES
+Optimization Finished!
+Training cost= 0.3125309 W= [-1.5229127] b= -0.00091842643
+
+Testing... (L2 loss Comparison)
+Testing cost= 0.31561646
+Absolute l2 loss difference: 0.0030855536
+
+b}. The smallest error is determinant on so many things.
+Becuase the of the starting value of w and b is rsndom. But the
+simple regression tends to have lower cost on test data
+than multi-regression.
+
+
+c. Over-fitting is a term used when the prediction doesn't
+generalized from training data to testing data. So when the cost
+is larger on the test data than on the training data we over-fitted
+and we cant generalize to new cases even though its a lot
+smaller. In the case where the training cost is higher than test cost, we under-fitted
+to the training data and it generalizes better to test data. The train depends on the
+amount of epoch we used.
+

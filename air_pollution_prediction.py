@@ -7,7 +7,7 @@ tf.disable_v2_behavior()
 
 # Parameters
 learning_rate = 0.001
-training_epochs = 400
+training_epochs = 1001
 display_step = 20
 
 train_data_path = 'training_data.csv'
@@ -17,7 +17,7 @@ test_data_path = 'test_data.csv'
 def linear_regression_polynomial(degree, is_multi_variable):
     raw_train_dataset = library.data_processing(train_data_path)
 
-    X_d = pd.DataFrame(raw_train_dataset[['TEMP', 'PRES', 'DEWP']]).to_numpy()
+    X_d = pd.DataFrame(raw_train_dataset[['TEMP', 'PRES', 'DEWP']]).to_numpy() # Change the variables here to train using different values
     Y_d = pd.DataFrame(raw_train_dataset[['PM2.5']]).to_numpy()
 
     X = tf.placeholder(tf.float32, name='x')
@@ -67,7 +67,7 @@ def linear_regression_polynomial(degree, is_multi_variable):
         training_cost = sess.run(loss, feed_dict={X: X_d, Y: Y_d})
         print("Training cost=", training_cost, "W=", sess.run(w), "b=", sess.run(b), '\n')
         raw_test_dataset = library.data_processing(test_data_path)
-        X_test_d = pd.DataFrame(raw_test_dataset[['TEMP','PRES', 'DEWP']]).to_numpy()
+        X_test_d = pd.DataFrame(raw_test_dataset[['TEMP', 'PRES', 'DEWP']]).to_numpy() # Change the variables here to train using different values
         Y_test_d = pd.DataFrame(raw_test_dataset[['PM2.5']]).to_numpy()
         print("Testing... (L2 loss Comparison)")
         testing_cost = sess.run(tf.reduce_sum(tf.pow(y_pred-Y, 2))/(2*X_test_d.shape[0]),
@@ -169,17 +169,17 @@ def simple_linear_regression():
                       "{:.9f}".format(sess.run(loss, feed_dict={X: X_d, Y: Y_d})),
                       "W=", sess.run(w), "b=", sess.run(b))
 
-                # fig = plt.figure(figsize=(10, 10), dpi=100)
-                # ax = fig.add_subplot(111)
-                # ax.set_ylim(0, 1)
-                # ax.plot(X_d, Y_d, 'ro', label='Original data')
-                #
-                # ax.plot(X_d, sess.run(w) * X_d + sess.run(b), label='Fitted line')
-                # ax.legend()
-                # plt.show()
-                # fig.savefig( 'plot_{:05d}.png'.format(count), bbox_inches='tight', dpi=100)
-                # count = count + 1
-                # plt.close(fig)
+                fig = plt.figure(figsize=(10, 10), dpi=100)
+                ax = fig.add_subplot(111)
+                ax.set_ylim(0, 1)
+                ax.plot(X_d, Y_d, 'ro', label='Original data')
+
+                ax.plot(X_d, sess.run(w) * X_d + sess.run(b), label='Fitted line')
+                ax.legend()
+                plt.show()
+                fig.savefig( 'plot_{:05d}.png'.format(count), bbox_inches='tight', dpi=100)
+                count = count + 1
+                plt.close(fig)
         print("Optimization Finished!")
         training_cost = sess.run(loss, feed_dict={X: X_d, Y: Y_d})
         t_w = sess.run(w)
@@ -197,7 +197,7 @@ def simple_linear_regression():
 
 
 def main():
-    linear_regression_categorical()
+    linear_regression_polynomial(10, True)
 
 
 if __name__ == '__main__':
