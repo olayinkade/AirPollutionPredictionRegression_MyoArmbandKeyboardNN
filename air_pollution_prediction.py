@@ -138,7 +138,7 @@ def linear_regression_categorical():
 
 def simple_linear_regression():
     raw_train_dataset = library.data_processing(train_data_path)
-    X_d = pd.DataFrame(raw_train_dataset[['TEMP']]).to_numpy()
+    X_d = pd.DataFrame(raw_train_dataset[['TEMP']]).to_numpy() # Change the variables here to train using different values
     Y_d = pd.DataFrame(raw_train_dataset[['PM2.5']]).to_numpy()
 
     X = tf.placeholder(tf.float32, [X_d.shape[0], X_d.shape[1]], name='x')
@@ -187,7 +187,7 @@ def simple_linear_regression():
         print("Training cost=", training_cost, "W=", t_w, "b=", t_b, '\n')
 
         raw_test_dataset = library.data_processing(test_data_path)
-        X_test_d = pd.DataFrame(raw_test_dataset[['TEMP']]).to_numpy()
+        X_test_d = pd.DataFrame(raw_test_dataset[['TEMP']]).to_numpy() # Change the variables here to train using different values
         Y_test_d = pd.DataFrame(raw_test_dataset[['PM2.5']]).to_numpy()
         print("Testing... (L2 loss Comparison)")
         testing_cost = sess.run(tf.reduce_sum(tf.pow(y_pred - Y, 2)) / (2 * X_test_d.shape[0]),
